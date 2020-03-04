@@ -1,0 +1,4 @@
+build/*.pdb
+build/Debug
+build/*.obj
+build/*.ilk

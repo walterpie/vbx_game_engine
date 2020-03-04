@@ -1,0 +1,29 @@
+Version 0.01
+
+>> Basic prototyping platform layer and staring to work on the game 
+
+* Days: 001 - ??? ()
+
+Day 001:
+    - Starting to work on the platform layer.
+    - Initialized the display buffer for the window.
+    * Programming session duration: 1:30 hrs
+
+Day 002:
+    - Cleaning up the display buffer implementation.
+    - Clearing the screen and pixel drawing.
+    - Basic rectangle drawing and line drawing.
+    - Testing the line drawing with some triginometry.
+    * Programming session duration: 2:20 hrs
+
+Day 003:
+    - Platform layer keyboard input and mouse input.
+    - Seperating the platform independent code for the platform dependent.
+    - Platform independent input.
+    * Programming session duration: 2 hrs
+
+
+
+
+
+
