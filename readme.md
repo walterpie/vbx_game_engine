@@ -1,5 +1,6 @@
 # Vbx game engine
 
-***A free game engine developed from scratch in C.***
+***A game engine developed from scratch in C.***
 
+Feel free to use this crapy game engine!!!
 Documentation coming soon!
