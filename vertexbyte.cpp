@@ -54,6 +54,11 @@ void draw_rectangle(Bitmap *buffer,
   s32 max_x = round_real32_to_signed32(real_min_x + real_max_x);
   s32 max_y = round_real32_to_signed32(real_min_y + real_max_y);
 
+  if((max_y < 0) || (max_x < 0))
+  {
+    return;
+  }
+  
   //NOTE(vertexbyte): Clipping!!!
   if(min_x < 0)
   {
@@ -186,8 +191,5 @@ Window_State initialize_window_state()
 internal void
 game_update_and_render(Bitmap *draw_buffer, Input *input)
 {
-  clear_screen(draw_buffer, 0.2f, 0.2f, 0.9f);
-  
-  if(input[0].keyboard_buttons[BUTTON_UP].is_down)
-    clear_screen(draw_buffer, 0.2f, 0.2f, 0.2f);
+  clear_screen(draw_buffer, 0.0f, 0.0f, 0.0f);
 }

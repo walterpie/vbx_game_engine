@@ -1,5 +1,10 @@
 #include <windows.h>
+#include <stdio.h>
 #include "vertexbyte.cpp"
+
+// TODO(vertexbyte): Make a intrinsics.h
+#include <intrin.h>
+#pragma intrinsic(__rdtsc)
 
 struct Win32_Display_Buffer
 {
@@ -12,6 +17,7 @@ struct Win32_Display_Buffer
 
 global_variable b32 global_running;
 global_variable Window_State global_window_state;
+global_variable u64 counts_per_second;
 
 internal void
 win32_initialize_display_buffer(Win32_Display_Buffer *buffer,
@@ -129,11 +135,44 @@ case vk:\
   }
 }
 
+// NOTE(vertexbyte): This returns the counts of the process
+u64 win32_get_wall_clock()
+{
+  u64 result = 0;
+  LARGE_INTEGER large_integer = {};
+  QueryPerformanceCounter(&large_integer);
+  result = large_integer.QuadPart;
+  
+  return(result);
+}
+
+r32 win32_wall_clock_ms(u64 start, u64 end)
+{
+  r32 result = 0.0f;
+  u64 elapsed = end - start;
+
+  result = (r32)elapsed/(r32)counts_per_second;
+
+  return(result);
+}
+
 INT WinMain(HINSTANCE instance,
 	    HINSTANCE prev_instance,
 	    PSTR command_line,
 	    INT command_show)
 {
+  // NOTE(vertexbyte): Get the counts per second(fixed at system boot time)
+  LARGE_INTEGER pref_freq = {};
+  QueryPerformanceFrequency(&pref_freq);
+  counts_per_second = pref_freq.QuadPart;
+
+  b32 time_is_granular = true;
+  
+  if(timeBeginPeriod(1) == TIMERR_NOCANDO)
+  {
+    time_is_granular = false;
+  }
+  
   WNDCLASSA window_class = {};
   window_class.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
   window_class.lpfnWndProc = win32_main_window_procedure;
@@ -174,15 +213,71 @@ INT WinMain(HINSTANCE instance,
       
       Input *new_input = &input[0];
       Input *old_input = &input[1];
+
+      u64 start_counter = win32_get_wall_clock();
+      u64 start_cycles = __rdtsc();
+
+      r32 target_fps = 1.0f/30.0f;
+      r32 win32_passed_time = 0.0f;
       
       while(global_running)
       {
 	win32_process_peek_messages(new_input, old_input, window);
 	game_update_and_render(&draw_buffer, input);
-	*old_input = *new_input;
 
+	// NOTE(vertexbyte): GUR stands for game update and render
+	u64 end_counter = win32_get_wall_clock();
+	r32 gur_ms = win32_wall_clock_ms(start_counter,
+					 end_counter);
+
+	if(gur_ms < target_fps)
+	{
+	  while(gur_ms < target_fps)
+	  {
+	    if(time_is_granular)
+	    {
+	      s32 sleep_time = (s32)(target_fps*1000) - (s32)(gur_ms*1000);
+	      Sleep(sleep_time);
+	    }
+
+	    end_counter = win32_get_wall_clock();
+	    gur_ms = win32_wall_clock_ms(start_counter,
+					 end_counter);
+	  }
+	}
+	
 	win32_copy_display_buffer_to_screen(&display_buffer,
 					    device_context);
+
+	//
+	// Outputing frame time
+	//
+
+	u64 counts_per_frame = end_counter - start_counter;
+	u64 end_cycles = __rdtsc();
+
+	u64 cycles_elapsed = end_cycles - start_cycles;
+
+	r32 ms_per_frame = (r32)counts_per_frame/(r32)counts_per_second;
+	r32 fps = 1.0f/ms_per_frame;
+	u32 mc_per_frame = cycles_elapsed / (1000*1000);
+
+	win32_passed_time += ms_per_frame;
+	
+	if(win32_passed_time >= 1.0f)
+	{
+	  char buffer[256];
+	  sprintf(buffer, "MS: %.4f FPS: %f MPF: %d\n", ms_per_frame,
+		  fps, mc_per_frame);
+	  
+	  OutputDebugStringA(buffer);
+	  win32_passed_time = 0.0f;
+	}
+	
+	start_counter = end_counter;
+	start_cycles = end_cycles;
+
+	*old_input = *new_input;
       }
     }
     else
