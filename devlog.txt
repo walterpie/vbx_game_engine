@@ -22,6 +22,11 @@ Day 003:
     - Platform independent input.
     * Programming session duration: 2 hrs
 
+Day 004:
+    - QueryPerformaceCounter and _rdtsc()
+    - Enforcing a video frame rate
+    * Programming session duration: 1:30 hrs
+
 
 
 
