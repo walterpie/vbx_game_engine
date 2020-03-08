@@ -1,3 +1,7 @@
+A big ass devlog file, that nobody asekd for.
+This file contains what was done each day during the vbx game engine development.
+So yeah guys software takes time.
+
 Version 0.01
 
 >> Basic prototyping platform layer and staring to work on the game 
@@ -27,6 +31,9 @@ Day 004:
     - Enforcing a video frame rate
     * Programming session duration: 1:30 hrs
 
+Day 005: 
+    - Dynamic code reloading(Man, this one is alway a fun one).
+    * Programming session duration: 1 hrs
 
 
 
