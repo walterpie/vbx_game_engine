@@ -173,9 +173,8 @@ void draw_line_slow(Bitmap *buffer,
   }
 }
 
-
-internal
-Window_State initialize_window_state()
+extern "C"
+INITIALIZE_WINDOW_STATE(initialize_window_state)
 {
   Window_State state = {};
   
@@ -188,8 +187,8 @@ Window_State initialize_window_state()
   return(state);
 }
 
-internal void
-game_update_and_render(Bitmap *draw_buffer, Input *input)
+extern "C"
+GAME_UPDATE_AND_RENDER(game_update_and_render)
 {
-  clear_screen(draw_buffer, 0.0f, 0.0f, 0.0f);
+  clear_screen(draw_buffer, 1.0f, 0.0f, 0.0f);
 }

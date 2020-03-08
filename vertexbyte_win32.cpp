@@ -1,10 +1,17 @@
 #include <windows.h>
 #include <stdio.h>
-#include "vertexbyte.cpp"
+#include "vertexbyte.h"
 
 // TODO(vertexbyte): Make a intrinsics.h
 #include <intrin.h>
 #pragma intrinsic(__rdtsc)
+
+struct Win32_Game_Code
+{
+  HMODULE game_dll;
+  Game_Update_And_Render *game_update_and_render;
+  Initialize_Window_State *initialize_window_state;
+};
 
 struct Win32_Display_Buffer
 {
@@ -20,6 +27,38 @@ global_variable Window_State global_window_state;
 global_variable u64 counts_per_second;
 
 internal void
+load_game_code(Win32_Game_Code *game_code)
+{
+  CopyFile("vertexbyte.dll", "vertexbyte_load.dll", 0);
+  
+  game_code->game_dll = LoadLibraryA("vertexbyte_load.dll");
+  
+  if(game_code->game_dll)
+  {
+    // NOTE(vertexbyte): Loading the functions for the dll
+    game_code->game_update_and_render =
+      (Game_Update_And_Render *)GetProcAddress(game_code->game_dll, "game_update_and_render");
+    
+    game_code->initialize_window_state =
+      (Initialize_Window_State *)GetProcAddress(game_code->game_dll, "initialize_window_state");
+  }
+}
+
+internal void
+unload_game_code(Win32_Game_Code *game_code)
+{
+  
+  if(game_code->game_dll)
+  {
+    FreeLibrary(game_code->game_dll);
+  }
+
+  game_code->game_update_and_render = game_update_and_render_stub;
+  game_code->initialize_window_state = initialize_window_state_stub;
+}
+
+
+internal void
 win32_initialize_display_buffer(Win32_Display_Buffer *buffer,
 				int width, int height)
 {
@@ -31,6 +70,7 @@ win32_initialize_display_buffer(Win32_Display_Buffer *buffer,
   buffer->info.bmiHeader.biSize = sizeof(buffer->info.bmiHeader);
   buffer->info.bmiHeader.biWidth = width;
   buffer->info.bmiHeader.biHeight = -height;
+  
   buffer->info.bmiHeader.biPlanes = 1;
   buffer->info.bmiHeader.biBitCount = 32;
   buffer->info.bmiHeader.biCompression = BI_RGB; // NOTE(vertexybte): Uncompressed
@@ -178,11 +218,13 @@ INT WinMain(HINSTANCE instance,
   window_class.lpfnWndProc = win32_main_window_procedure;
   window_class.lpszClassName = "vbx_class";
 
-  
   if(RegisterClassA(&window_class))
   {
-    global_window_state = initialize_window_state();
-      
+    Win32_Game_Code game_code = {};
+    load_game_code(&game_code);
+
+    global_window_state = game_code.initialize_window_state();
+    
     HWND window = CreateWindowEx(0, window_class.lpszClassName,
 				 global_window_state.title,
 				 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
@@ -190,7 +232,6 @@ INT WinMain(HINSTANCE instance,
 				 global_window_state.width,
 				 global_window_state.height,
 				 0, 0, 0, 0);
-
     if(window)
     {
       global_running = true;
@@ -219,12 +260,29 @@ INT WinMain(HINSTANCE instance,
 
       r32 target_fps = 1.0f/30.0f;
       r32 win32_passed_time = 0.0f;
+
+      WIN32_FIND_DATA starting_file_time;
+      WIN32_FIND_DATA changed_file_time;
+
+      FindFirstFileA("vertexbyte.dll", &starting_file_time);
       
       while(global_running)
       {
-	win32_process_peek_messages(new_input, old_input, window);
-	game_update_and_render(&draw_buffer, input);
+	FindFirstFileA("vertexbyte.dll", &changed_file_time);
 
+	FILETIME starting_time = starting_file_time.ftLastWriteTime;
+	FILETIME changed_time = changed_file_time.ftLastWriteTime;
+	
+	if(CompareFileTime(&starting_time, &changed_time) != 0)
+	{
+	  unload_game_code(&game_code);
+	  load_game_code(&game_code);
+	  starting_file_time = changed_file_time;
+	}
+		
+	win32_process_peek_messages(new_input, old_input, window);
+	game_code.game_update_and_render(&draw_buffer, input);
+	
 	// NOTE(vertexbyte): GUR stands for game update and render
 	u64 end_counter = win32_get_wall_clock();
 	r32 gur_ms = win32_wall_clock_ms(start_counter,

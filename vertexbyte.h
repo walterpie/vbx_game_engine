@@ -100,8 +100,25 @@ struct Bitmap
   void *memory;
 };
 
-internal
-Window_State initialize_window_state();
+
+// NOTE(vertexbyte): game_update_and_render
+#define GAME_UPDATE_AND_RENDER(name) void name(Bitmap *draw_buffer, Input *input)
+typedef GAME_UPDATE_AND_RENDER(Game_Update_And_Render);
+
+GAME_UPDATE_AND_RENDER(game_update_and_render_stub)
+{
+  return;
+}
+
+// NOTE(vertexbyte): initialize_window_state
+#define INITIALIZE_WINDOW_STATE(name) Window_State name()
+typedef INITIALIZE_WINDOW_STATE(Initialize_Window_State);
+
+INITIALIZE_WINDOW_STATE(initialize_window_state_stub)
+{
+  Window_State state = {};
+  return(state);
+}
 
 internal
 void draw_pixel_slow(Bitmap *buffer, s32 x, s32 y, u32 color);
@@ -119,10 +136,6 @@ internal
 void draw_line_slow(Bitmap *buffer, r32 real_x1, r32 real_y1,
 		    r32 real_x2, r32 real_y2,
 		    r32 r, r32 g, r32 b);
-
-internal
-void game_update_and_render(Bitmap *draw_buffer, Input *input);
-  
 
 #define VERTEXBYTE_H
 #endif
