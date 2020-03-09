@@ -1,12 +1,11 @@
-A big ass devlog file, that nobody asekd for.
 This file contains what was done each day during the vbx game engine development.
 So yeah guys software takes time.
 
 Version 0.01
 
->> Basic prototyping platform layer and staring to work on the game 
+>> Basic prototyping platform layer 
 
-* Days: 001 - ??? ()
+* Days: 001 - 006 [DAYS: 6, HOURS: 10:20 hours spent programming v0.01]
 
 Day 001:
     - Starting to work on the platform layer.
@@ -35,7 +34,26 @@ Day 005:
     - Dynamic code reloading(Man, this one is alway a fun one).
     * Programming session duration: 1 hrs
 
+Day 006: 
+    - Cleaning up the code.
+    - Seperating the software render code into a vertexbyte_soft.cpp
+    - vertexbyte_intrinsics.cpp for intrinsics
+    - Implementing a routine to wrap pixels and coordinates "around" the screen.
+    - Acessing keyboard button states is now easier.
+    - Basic 2d vectors implemented.
+    * Programming session duration: 2 hrs
 
 
+Version 0.02:
 
+>> Testing the game engine by making asteroids.
+>> Some more software rendering routines.
+>> Game memory and game state.
+
+* Days: 006 - ??? [DAYS: ?, HOURS: ??? hours spent programming v0.02]
+
+Day 007: 
+    - 
+    - 
+    * Programming session duration: ??? hrs
 

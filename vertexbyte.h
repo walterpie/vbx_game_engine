@@ -28,24 +28,8 @@ typedef s32 b32;
 #define local_persist static
 #define global_variable static
 
-
-// TODO(faruk): Move to intrinsics!!!!
-r32 round_real32_to_signed32(r32 value)
-{
-  s32 result = (s32)(value + 0.5f);
-  return(result);
-}
-
-s32 absolute_value_s32(s32 value)
-{
-  s32 result = value;
-  if(value < 0)
-  {
-    result = -value;
-  }
-  return(value);
-}
-
+#include "vertexbyte_intrinsics.cpp"
+#include "vertexbyte_math.cpp"
 
 enum
 {
@@ -90,6 +74,7 @@ struct Window_State
   s32 buffer_width;
   s32 buffer_height;
   char *title;
+  r32 target_fps;
 };
   
 struct Bitmap
@@ -100,9 +85,44 @@ struct Bitmap
   void *memory;
 };
 
+// NOTE(vertexbyte): Routines to determin the button states
+// NOTE(vertexbyte): Our input pointer ponits to two input structures
+// because we have a new_input(index 0) and a old_input(index 1)
+b32 button_down(Input *input, s32 index)
+{
+  b32 result = false;
+  if(input[0].keyboard_buttons[index].is_down)
+  {
+    result = true;
+  }
+  return(result);
+}
+
+b32 button_released(Input *input, s32 index)
+{
+  b32 result = false;
+  if(!input[0].keyboard_buttons[index].is_down &&
+     input[1].keyboard_buttons[index].is_down)
+  {
+    result = true;
+  }
+  return(result);
+}
+
+b32 button_pressed(Input *input, s32 index)
+{
+  b32 result = false;
+  if(input[0].keyboard_buttons[index].is_down &&
+     !input[1].keyboard_buttons[index].is_down)
+  {
+    result = true;
+  }
+  return(result);
+}
+
 
 // NOTE(vertexbyte): game_update_and_render
-#define GAME_UPDATE_AND_RENDER(name) void name(Bitmap *draw_buffer, Input *input)
+#define GAME_UPDATE_AND_RENDER(name) void name(Bitmap *draw_buffer, Input *input, r32 delta_time)
 typedef GAME_UPDATE_AND_RENDER(Game_Update_And_Render);
 
 GAME_UPDATE_AND_RENDER(game_update_and_render_stub)

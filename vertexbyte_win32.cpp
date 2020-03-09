@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include "vertexbyte.h"
 
-// TODO(vertexbyte): Make a intrinsics.h
-#include <intrin.h>
-#pragma intrinsic(__rdtsc)
-
 struct Win32_Game_Code
 {
   HMODULE game_dll;
@@ -258,7 +254,8 @@ INT WinMain(HINSTANCE instance,
       u64 start_counter = win32_get_wall_clock();
       u64 start_cycles = __rdtsc();
 
-      r32 target_fps = 1.0f/30.0f;
+      r32 target_delta_time = 1.0f/global_window_state.target_fps;
+      r32 delta_time = target_delta_time;
       r32 win32_passed_time = 0.0f;
 
       WIN32_FIND_DATA starting_file_time;
@@ -281,20 +278,20 @@ INT WinMain(HINSTANCE instance,
 	}
 		
 	win32_process_peek_messages(new_input, old_input, window);
-	game_code.game_update_and_render(&draw_buffer, input);
+	game_code.game_update_and_render(&draw_buffer, input, delta_time);
 	
 	// NOTE(vertexbyte): GUR stands for game update and render
 	u64 end_counter = win32_get_wall_clock();
 	r32 gur_ms = win32_wall_clock_ms(start_counter,
 					 end_counter);
 
-	if(gur_ms < target_fps)
+	if(gur_ms < target_delta_time)
 	{
-	  while(gur_ms < target_fps)
+	  while(gur_ms < target_delta_time)
 	  {
 	    if(time_is_granular)
 	    {
-	      s32 sleep_time = (s32)(target_fps*1000) - (s32)(gur_ms*1000);
+	      s32 sleep_time = (s32)(target_delta_time*1000) - (s32)(gur_ms*1000);
 	      Sleep(sleep_time);
 	    }
 
@@ -317,6 +314,7 @@ INT WinMain(HINSTANCE instance,
 	u64 cycles_elapsed = end_cycles - start_cycles;
 
 	r32 ms_per_frame = (r32)counts_per_frame/(r32)counts_per_second;
+	delta_time = ms_per_frame;
 	r32 fps = 1.0f/ms_per_frame;
 	u32 mc_per_frame = cycles_elapsed / (1000*1000);
 
