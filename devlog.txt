@@ -46,8 +46,9 @@ Day 006:
 
 Version 0.02:
 
->> Testing the game engine by making asteroids.
+>> Made some games: froggert, asteroids.
 >> Some more software rendering routines.
+>> Added some basic physics.
 >> Game memory and game state.
 
 * Days: 006 - ??? [DAYS: ?, HOURS: ??? hours spent programming v0.02]

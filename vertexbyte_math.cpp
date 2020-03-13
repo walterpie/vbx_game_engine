@@ -58,3 +58,23 @@ Vec2r operator/(Vec2r a, Vec2r b)
   return(result);
 }
 
+
+//
+// Colors
+//
+
+struct Color
+{
+  r32 r;
+  r32 g;
+  r32 b;
+};
+
+Color make_color(r32 r, r32 g, r32 b)
+{
+  Color result = {};
+  result.r = r;
+  result.g = g;
+  result.b = b;
+  return(result);
+}
