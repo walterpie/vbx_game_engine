@@ -54,7 +54,6 @@ Version 0.02:
 * Days: 006 - ??? [DAYS: ?, HOURS: ??? hours spent programming v0.02]
 
 Day 007: 
-    - 
-    - 
-    * Programming session duration: ??? hrs
+    - Made frogger with v0.01
+    * Programming session duration: 4:00 hrs
 

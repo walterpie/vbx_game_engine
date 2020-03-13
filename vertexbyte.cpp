@@ -16,20 +16,25 @@ INITIALIZE_WINDOW_STATE(initialize_window_state)
   return(state);
 }
 
+
 #define FROGGER_SIZE 20
 #define GRID_SIZE 30
 #define OBSTICLE_SIZE 25
 
+#define DRAW_WIDTH 800
+#define DRAW_HEIGHT 600
 
 // NOTE(vertexbyte): In this case because fogger is such a small game
-// these global variables are acceptable
+// these global variables are acceptable 
+
 // NOTE(vertexbyte): Our resolution is always 800x600.
-#define STARTING_X (800/2)
-#define STARTING_Y  (600 - (GRID_SIZE-5))
+#define STARTING_X (DRAW_WIDTH/2)
+#define STARTING_Y  (DRAW_HEIGHT - (GRID_SIZE-5))
+#define STARTING_LANE (DRAW_HEIGHT/GRID_SIZE) - 1
 
 Vec2r frogger = make_vec2r(STARTING_X, STARTING_Y);
 Color frogger_color = make_color(0.3f, 1.0f, 0.2f);
-s32 frogger_lane_index = (600/GRID_SIZE) - 1;
+s32 frogger_lane_index = (DRAW_HEIGHT/GRID_SIZE) - 1;
 r32 frogger_x_velocity = 0.0f;
 
 enum
@@ -120,10 +125,8 @@ Color log_colors[3] =
   {1.0f, 0.4f, 0.2f}
 };
 
-// NOTE(vertexbyte): 
 void add_obsticle_to_lane(s32 lane_index, s32 count)
 {
-
   // NOTE(vertexbyte): The colors pointer well be our color array
   // for the current lane type so if the lane type is watter then the
   // obsticle will have a orange color if its a car lane it will have
@@ -154,7 +157,7 @@ void add_obsticle_to_lane(s32 lane_index, s32 count)
   }
   else
   {
-    spacing = (800/count) - (rand() % (s32)dim.x*OBSTICLE_SIZE);
+    spacing = (DRAW_WIDTH/count) - (rand() % (s32)dim.x*OBSTICLE_SIZE);
   }
 
   for(s32 obsticles_created = 0;
@@ -199,19 +202,57 @@ void draw_and_update_obsticles(Bitmap *draw_buffer, r32 delta_time)
 void draw_lanes(Bitmap *draw_buffer)
 {
   for(s32 i = 0;
-      i < 600/GRID_SIZE;
+      i < DRAW_HEIGHT/GRID_SIZE;
       ++i)
   {    
-    draw_rectangle(draw_buffer, 0, 0+(GRID_SIZE*i), 800, GRID_SIZE,
+    draw_rectangle(draw_buffer, 0, GRID_SIZE*i, DRAW_WIDTH, GRID_SIZE,
 		   lanes[i].color.r, lanes[i].color.g, lanes[i].color.b);
   }
 }
 
 
+struct Safe_Zone
+{
+  Vec2r pos;
+  Color color;
+};
+
+#define SAFE_ZONE_COUNT 3
+#define SAFE_ZONE_SIZE 50
+
+Safe_Zone safe_zones[SAFE_ZONE_COUNT] =
+{
+  {make_vec2r(100, 0), make_color(0.4f, 0.6f, 0.2f)},
+  {make_vec2r(350, 0), make_color(0.4f, 0.6f, 0.2f)},
+  {make_vec2r(650, 0), make_color(0.4f, 0.6f, 0.2f)}
+};
+
+void draw_and_update_safe_zones(Bitmap *draw_buffer)
+{
+  for(s32 zone_index = 0;
+      zone_index < SAFE_ZONE_COUNT;
+      ++zone_index)
+  {
+    Vec2r pos = safe_zones[zone_index].pos;
+    if((frogger.x + FROGGER_SIZE > pos.x) &&
+       (frogger.x < pos.x + SAFE_ZONE_SIZE) &&
+       (frogger.y + FROGGER_SIZE > pos.y) &&
+       (frogger.y < pos.y + SAFE_ZONE_SIZE))
+    {
+      safe_zones[zone_index].color = make_color(1.0f, 0.0f, 0.0f);
+      break;
+    }
+    
+    draw_rectangle(draw_buffer, safe_zones[zone_index].pos.x, safe_zones[zone_index].pos.y,
+		   SAFE_ZONE_SIZE, SAFE_ZONE_SIZE,
+		   safe_zones[zone_index].color.r, safe_zones[zone_index].color.g, safe_zones[zone_index].color.b);
+  }
+}
+
 void check_collisions()
 {
   b32 on_log = false;
-  
+
   for(s32 obsticle_index = 0;
       obsticle_index < obsticle_count;
       ++obsticle_index)
@@ -229,16 +270,19 @@ void check_collisions()
 	// NOTE(vertexbyte): AABB
 	// NOTE(vertexbyte): We only use forggers centered
 	/// position for collision checking this is to give
-	// the player some wiggle roomw
-	
-	if((frogger.x + FROGGER_SIZE/2 > pos.x) &&
-	   (frogger.x + FROGGER_SIZE/2 < pos.x + dim.x*OBSTICLE_SIZE) &&
-	   (frogger.y + FROGGER_SIZE/2 > pos.y) &&
-	   (frogger.y + FROGGER_SIZE/2 < pos.y + dim.y*OBSTICLE_SIZE))
+	// the player some wiggle room
+
+	// NOTE(vertexbyte): The dim is the dimension in units so 
+	// that why we multply with the obsticle size
+	r32 half_size = FROGGER_SIZE/2;
+	if((frogger.x + half_size > pos.x) &&
+	   (frogger.x + half_size < pos.x + dim.x*OBSTICLE_SIZE) &&
+	   (frogger.y + half_size > pos.y) &&
+	   (frogger.y + half_size < pos.y + dim.y*OBSTICLE_SIZE))
 	{
 	  frogger.x = STARTING_X;
 	  frogger.y = STARTING_Y;
-	  frogger_lane_index = (600/GRID_SIZE) - 1;
+	  frogger_lane_index = STARTING_LANE;
 	}
       }
       else if(lanes[frogger_lane_index].type == LANE_WATTER)
@@ -265,7 +309,7 @@ void check_collisions()
   {
     frogger.x = STARTING_X;
     frogger.y = STARTING_Y;
-    frogger_lane_index = (600/GRID_SIZE) - 1;
+    frogger_lane_index = STARTING_LANE;
     frogger_x_velocity = 0.0f;
   }
 }
@@ -280,10 +324,11 @@ GAME_UPDATE_AND_RENDER(game_update_and_render)
     srand(time(0));
 
     // NOTE(vertexbyte): What is good about this is the ability to change
-    // the map obeticles(vehicles) dynamicly meaning that if the player
+    // the map obsticles dynamicly meaning that if the player
     // reaches higer scores we want to make it harder for him, and
-    // we can already change the speed of the lanes and the vehicle
-    // counts of the lanes
+    // we can already change the speed of the lanes and the number of
+    // obsticles in a prarticular lane
+
     add_obsticle_to_lane(14, 3);
     add_obsticle_to_lane(15, 2);
     add_obsticle_to_lane(16, 3);
@@ -308,6 +353,7 @@ GAME_UPDATE_AND_RENDER(game_update_and_render)
 
   draw_lanes(draw_buffer);
   draw_and_update_obsticles(draw_buffer, delta_time);
+  draw_and_update_safe_zones(draw_buffer);
   check_collisions();
   
   if(button_pressed(input, BUTTON_W))
@@ -331,8 +377,11 @@ GAME_UPDATE_AND_RENDER(game_update_and_render)
 
   frogger.x += frogger_x_velocity*delta_time;
 
+  wrap_coordinates(frogger.x, frogger.y, &frogger.x, &frogger.y,
+		   draw_buffer->width, draw_buffer->height);
+
   // TODO(vertexbyte): Write a overloaded draw_rectangle that takes in
   // vectors and colors
-  draw_rectangle(draw_buffer, frogger.x, frogger.y, FROGGER_SIZE,
-		 FROGGER_SIZE, frogger_color.r, frogger_color.g, frogger_color.b);
+  draw_rectangle_wrap(draw_buffer, frogger.x, frogger.y, FROGGER_SIZE,
+		      FROGGER_SIZE, frogger_color.r, frogger_color.g, frogger_color.b);
 }
