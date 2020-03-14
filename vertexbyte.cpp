@@ -54,9 +54,9 @@ struct Lane
 
 #define GRASS_LANE {0.0f, make_color(0.4f, 0.6f, 0.4f), LANE_GRASS}
 #define CAR_LANE_SLOW {70.0f, make_color(0.8f, 0.8f, 0.8f), LANE_CAR}
-#define CAR_LANE_MEDIUM {120.0f, make_color(0.8f, 0.8f, 0.8f), LANE_CAR}
+#define CAR_LANE_MEDIUM {-120.0f, make_color(0.8f, 0.8f, 0.8f), LANE_CAR}
 #define CAR_LANE_FAST {200.0f, make_color(0.8f, 0.8f, 0.8f), LANE_CAR}
-#define WATTER_LANE_SLOW {70.0f, make_color(0.2f, 0.1f, 0.8f), LANE_WATTER}
+#define WATTER_LANE_SLOW {-70.0f, make_color(0.2f, 0.1f, 0.8f), LANE_WATTER}
 #define WATTER_LANE_FAST {180.0f, make_color(0.2f, 0.1f, 0.8f), LANE_WATTER}
 
 // NOTE(vertexbyte): Logs are also considered obsticles
@@ -138,10 +138,14 @@ void add_obsticle_to_lane(s32 lane_index, s32 count)
     dim = car_dims[rand() % 2];
     colors = car_colors;
   }
-  if(lanes[lane_index].type == LANE_WATTER)
+  else if(lanes[lane_index].type == LANE_WATTER)
   {
     dim = log_dims[rand() % 3];
     colors = log_colors;
+  }
+  else // No osticles on the grass lane it is the safety lane
+  {
+    return;
   }
     
   r32 starting_x = rand() % (GRID_SIZE*5);
@@ -377,11 +381,31 @@ GAME_UPDATE_AND_RENDER(game_update_and_render)
 
   frogger.x += frogger_x_velocity*delta_time;
 
-  wrap_coordinates(frogger.x, frogger.y, &frogger.x, &frogger.y,
-		   draw_buffer->width, draw_buffer->height);
+  // NOTE(vertexbyte): Keeping the player in the screen bounds 
+  if(frogger.x < 0)
+  {
+    frogger.x = 0;
+    frogger_lane_index = 0;
+  }
+  if(frogger.y < 0)
+  {
+    frogger.y = 0;
+    frogger_lane_index = 0;
+  }
+  if(frogger.x + FROGGER_SIZE > DRAW_WIDTH)
+  {
+    // NOTE(VERTEXBYTE): THis is so to center frogger at the current grid block
+    frogger.x = (DRAW_WIDTH - FROGGER_SIZE) - (GRID_SIZE-FROGGER_SIZE)/2;
+    frogger_lane_index = STARTING_LANE;
+  }
+  if(frogger.y + FROGGER_SIZE > DRAW_HEIGHT)
+  {
+    frogger.y = (DRAW_HEIGHT - FROGGER_SIZE) - (GRID_SIZE-FROGGER_SIZE)/2;
+    frogger_lane_index = STARTING_LANE;
+  }
 
   // TODO(vertexbyte): Write a overloaded draw_rectangle that takes in
   // vectors and colors
-  draw_rectangle_wrap(draw_buffer, frogger.x, frogger.y, FROGGER_SIZE,
-		      FROGGER_SIZE, frogger_color.r, frogger_color.g, frogger_color.b);
+  draw_rectangle(draw_buffer, frogger.x, frogger.y, FROGGER_SIZE,
+		 FROGGER_SIZE, frogger_color.r, frogger_color.g, frogger_color.b);
 }
