@@ -1,6 +1,6 @@
 @echo off
 
-set switches=-Zi -nologo 
+set switches=-Zi -nologo -DVERTEXBYTE_INTERNAL=1
 set linker_flags=/link user32.lib gdi32.lib winmm.lib /incremental:no
 set dll_linker_flags=/link /DLL /EXPORT:game_update_and_render /EXPORT:initialize_window_state /PDB:vertexbyte_%random%.pdb  /incremental:no
 

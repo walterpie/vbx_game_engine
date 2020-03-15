@@ -30,7 +30,20 @@ typedef s32 b32;
 #define local_persist static
 #define global_variable static
 
+/*
+  NOTE(vertexbyte):
+
+    VERTEXBYTE_INTERNAL: 
+      - 0 release build
+      - 1 build that only runs on only our this machine
+
+    VERTEXBYTE_SLOW: 
+      - 0 no slow code
+      - 1 slow code allowed
+ */
+
 #include "vertexbyte_intrinsics.cpp"
+#include "vertexbyte_memory.cpp"
 #include "vertexbyte_math.cpp"
 
 enum
@@ -124,7 +137,7 @@ b32 button_pressed(Input *input, s32 index)
 
 
 // NOTE(vertexbyte): game_update_and_render
-#define GAME_UPDATE_AND_RENDER(name) void name(Bitmap *draw_buffer, Input *input, r32 delta_time)
+#define GAME_UPDATE_AND_RENDER(name) void name(Bitmap *draw_buffer, Input *input, Game_Memory *memory, r32 delta_time)
 typedef GAME_UPDATE_AND_RENDER(Game_Update_And_Render);
 
 GAME_UPDATE_AND_RENDER(game_update_and_render_stub)
@@ -141,23 +154,6 @@ INITIALIZE_WINDOW_STATE(initialize_window_state_stub)
   Window_State state = {};
   return(state);
 }
-
-internal
-void draw_pixel_slow(Bitmap *buffer, s32 x, s32 y, u32 color);
-
-internal
-void clear_screen(Bitmap *buffer, r32 r, r32 g, r32 b);
-
-
-internal
-void draw_rectangle(Bitmap *buffer, r32 real_min_x, r32 real_min_y,
-		    r32 real_max_x, r32 real_max_y,
-		    r32 r, r32 g, r32 b);
-
-internal
-void draw_line_slow(Bitmap *buffer, r32 real_x1, r32 real_y1,
-		    r32 real_x2, r32 real_y2,
-		    r32 r, r32 g, r32 b);
 
 #define VERTEXBYTE_H
 #endif

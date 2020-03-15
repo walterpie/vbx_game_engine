@@ -57,3 +57,7 @@ Day 007:
     - Made frogger with v0.01
     * Programming session duration: 4:00 hrs
 
+Day 008: 
+    - Platform independent game memory
+    - Game State
+    * Programming session duration: 0:40 hrs

@@ -245,7 +245,29 @@ INT WinMain(HINSTANCE instance,
       draw_buffer.height = display_buffer.height;
       draw_buffer.pitch = display_buffer.pitch;
       draw_buffer.memory = display_buffer.memory;
-	
+
+#if VERTEXBYTE_INTERNAL
+      LPVOID base_address = (LPVOID)terabytes(2);
+#else
+      LPVOID base_address = 0;
+#endif
+      
+      Game_Memory memory = {};
+      memory.permanent_memory_size = kilobytes(96);
+      memory.transient_memory_size = megabytes(256);
+      memory.total_size = (memory.permanent_memory_size +
+			   memory.transient_memory_size);
+
+      memory.permanent_memory =
+	VirtualAlloc(base_address, memory.total_size, MEM_COMMIT|MEM_RESERVE,
+		     PAGE_READWRITE);
+
+      u8 *transient_memory_offset = ((u8 *)memory.permanent_memory +
+				     memory.permanent_memory_size);
+
+      memory.transient_memory = transient_memory_offset;
+
+      
       Input input[2] = {};
       
       Input *new_input = &input[0];
@@ -278,7 +300,8 @@ INT WinMain(HINSTANCE instance,
 	}
 		
 	win32_process_peek_messages(new_input, old_input, window);
-	game_code.game_update_and_render(&draw_buffer, input, delta_time);
+	game_code.game_update_and_render(&draw_buffer, input, &memory,
+					 delta_time);
 	
 	// NOTE(vertexbyte): GUR stands for game update and render
 	u64 end_counter = win32_get_wall_clock();
