@@ -46,12 +46,12 @@ Day 006:
 
 Version 0.02:
 
->> Made some games: froggert, asteroids.
+>> Made frogger(old nes game)
 >> Some more software rendering routines.
 >> Added some basic physics.
 >> Game memory and game state.
 
-* Days: 006 - ??? [DAYS: ?, HOURS: ??? hours spent programming v0.02]
+* Days: 006 - ??? [DAYS: ?, HOURS: 7:10 hours spent programming v0.02]
 
 Day 007: 
     - Made frogger with v0.01
@@ -61,3 +61,11 @@ Day 008:
     - Platform independent game memory
     - Game State
     * Programming session duration: 0:40 hrs
+
+Day 009: 
+    - Circle circle implemented
+    * Programming session duration: 1:00 hrs
+
+Day 010: 
+    - Triangle drawing implemented(Triangle rasterization)
+    * Programming session duration: 1:30 hrs

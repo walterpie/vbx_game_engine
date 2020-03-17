@@ -30,5 +30,20 @@ GAME_UPDATE_AND_RENDER(game_update_and_render)
   {
     game_state->is_initialized = true;
   }
-  clear_screen(draw_buffer, 0.0f, 0.0f, 0.0f);
+  clear_screen(draw_buffer, make_color(0.0f, 0.0f, 0.0f));
+
+  draw_circle_slow(draw_buffer, 300, 300, 50, make_color(0.0f, 1.0f, 0.0f));
+  
+  fill_triangle(draw_buffer, make_vec3r(100, 300, 0),
+		make_vec3r(50, 400, 0), make_vec3r(140, 400, 0),
+		make_color(1.0f, 0.0f, 0.0f));
+  
+  fill_triangle(draw_buffer, make_vec3r(400, 200, 0),
+		make_vec3r(500, 200, 0), make_vec3r(450, 400, 0),
+		make_color(1.0f, 0.0f, 0.0f));
+
+  fill_triangle(draw_buffer, make_vec3r(320, 200, 0),
+		make_vec3r(400, 300, 0), make_vec3r(300, 400, 0),
+		make_color(1.0f, 1.0f, 1.0f));
+  
 }
