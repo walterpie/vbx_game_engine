@@ -1,78 +1,97 @@
+#define PI32 3.14159265359 // PI
+
 //
 // Vectors
 //
 
-struct Vec2r
+// 2d
+struct V2
 {
   r32 x;
   r32 y;
 };
 
-internal
-Vec2r make_vec2r(r32 x, r32 y)
+r32 get_length_v2(V2 v)
 {
-  Vec2r result = {};
+  r32 result = sqrtf(v.x*v.x + v.y*v.y);
+  return(result);
+}
+
+void set_angle_v2(V2 *v, r32 angle)
+{
+  r32 lenght = get_length_v2(*v);
+  v->x = cosf(angle)*lenght;
+  v->y = sinf(angle)*lenght;
+}
+
+r32 get_angle_v2(V2 v)
+{
+  r32 result = atan2f(v.y, v.x);
+  return(result);
+}
+
+void set_length_v2(V2 *v, r32 length)
+{
+  r32 angle = get_angle_v2(*v);
+  v->x = cosf(angle)*length;
+  v->y = sinf(angle)*length;
+}
+
+
+V2 make_v2(r32 x, r32 y)
+{
+  V2 result = {};
   result.x = x;
   result.y = y;
   return(result);
 }
 
-Vec2r operator+(Vec2r a, Vec2r b)
+V2 operator+(V2 a, V2 b)
 {
-  Vec2r result = {};
+  V2 result = {};
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   return(result);
 }
 
-Vec2r operator-(Vec2r a, Vec2r b)
+V2 operator-(V2 a, V2 b)
 {
-  Vec2r result = {};
+  V2 result = {};
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   return(result);
 }
 
-Vec2r operator*(Vec2r a, Vec2r b)
+V2 operator*(V2 a, r32 b)
 {
-  Vec2r result = {};
-  result.x = a.x * b.x;
-  result.y = a.y * b.y;
+  V2 result = {};
+  result.x = a.x * b;
+  result.y = a.y * b;
   return(result);
 }
 
-Vec2r operator*(Vec2r a, r32 real_b)
+V2 operator/(V2 a, r32 b)
 {
-  Vec2r result = {};
-  result.x = a.x * real_b;
-  result.y = a.y * real_b;
+  V2 result = {};
+  result.x = a.x / b;
+  result.y = a.y / b;
   return(result);
 }
 
-
-Vec2r operator/(Vec2r a, Vec2r b)
-{
-  Vec2r result = {};
-  result.x = a.x / b.x;
-  result.y = a.y / b.y;
-  return(result);
-}
-
-struct Vec3r
+// 3d
+struct V3
 {
   r32 x;
   r32 y;
   r32 z;
 };
 
-internal
-Vec3r make_vec3r(r32 x, r32 y, r32 z)
+V3 make_v3(r32 x, r32 y, r32 z)
 {
-  Vec3r result = {};
+  V3 result = {};
   result.x = x;
   result.y = y;
   result.z = z;
   return(result);
 }
-
 

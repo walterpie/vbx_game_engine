@@ -389,13 +389,6 @@ void draw_circle_slow(Bitmap *buffer, r32 real_center_x, r32 real_center_y,
   u32 color32 = (((u32)(255.0f * color.r)) << 16 |
 		 ((u32)(255.0f * color.g)) << 8 |
 		 ((u32)(255.0f * color.b)) << 0);
-
-  draw_pixel(buffer, center_x + radius, center_y, color32);
-  draw_pixel(buffer, center_x - radius, center_y, color32);
-  draw_pixel(buffer, center_x, center_y - radius, color32);
-  draw_pixel(buffer, center_x, center_y + radius, color32);
-
-
   s32 x = 0;
   s32 y = round_real32_to_signed32(sqrt(radius_squared));
   
@@ -413,6 +406,11 @@ void draw_circle_slow(Bitmap *buffer, r32 real_center_x, r32 real_center_y,
     ++x;
     y = round_real32_to_signed32(sqrt((radius_squared) - x*x));
   }
+
+  draw_pixel(buffer, center_x + y, center_y + x, color32);
+  draw_pixel(buffer, center_x + y, center_y - x, color32);
+  draw_pixel(buffer, center_x - y, center_y + x, color32);
+  draw_pixel(buffer, center_x - y, center_y - x, color32);
 }
 
 void fill_circle_slow(Bitmap *buffer, r32 real_center_x, r32 real_center_y,
@@ -422,7 +420,7 @@ void fill_circle_slow(Bitmap *buffer, r32 real_center_x, r32 real_center_y,
   s32 center_y = round_real32_to_signed32(real_center_y);
   s32 radius = round_real32_to_signed32(real_radius);
   s32 radius_squared = radius*radius;
-  
+
   s32 x = 0;
   s32 y = round_real32_to_signed32(sqrt(radius_squared));
   
@@ -443,13 +441,19 @@ void fill_circle_slow(Bitmap *buffer, r32 real_center_x, r32 real_center_y,
     ++x;
     y = round_real32_to_signed32(sqrt((radius_squared) - x*x));
   }
+
+  draw_line(buffer, center_x + y, center_y + x,
+	    center_x + y, center_y - x, color);
+  
+  draw_line(buffer, center_x - y, center_y + x,
+	    center_x - y, center_y - x, color);
 }
 
 //
 // Trinalge rasterizer
 //
-void fill_triangle_bottom_flat(Bitmap *buffer, Vec3r v1,
-			       Vec3r v2, Vec3r v3, Color color)
+void fill_triangle_bottom_flat(Bitmap *buffer, V3 v1,
+			       V3 v2, V3 v3, Color color)
 {
   r32 y_start = v1.y;
   
@@ -473,8 +477,8 @@ void fill_triangle_bottom_flat(Bitmap *buffer, Vec3r v1,
   }
 }
 
-void fill_triangle_top_flat(Bitmap *buffer, Vec3r v1,
-			    Vec3r v2, Vec3r v3, Color color)
+void fill_triangle_top_flat(Bitmap *buffer, V3 v1,
+			    V3 v2, V3 v3, Color color)
 {
   // NOTE(vertexbyte): This can ba left.y or right.y they have the same y
   r32 y_start = v3.y;
@@ -497,19 +501,19 @@ void fill_triangle_top_flat(Bitmap *buffer, Vec3r v1,
   }
 }
 
-void fill_triangle(Bitmap *buffer, Vec3r v1, Vec3r v2, Vec3r v3,
+void fill_triangle(Bitmap *buffer, V3 v1, V3 v2, V3 v3,
 		   Color color)
 {
   // NOTE(vertexbyte): We need to sort the verteces by y cordinate
   if(v3.y < v2.y)
   {
-    Vec3r temp = v3;
+    V3 temp = v3;
     v3 = v2;
     v2 = temp;
   }
   if(v2.y < v1.y)
   {
-    Vec3r temp = v2;
+    V3 temp = v2;
     v2 = v1;
     v1 = temp;
   }
@@ -524,7 +528,7 @@ void fill_triangle(Bitmap *buffer, Vec3r v1, Vec3r v2, Vec3r v3,
   }
   else
   {
-    Vec3r v4 = {};
+    V3 v4 = {};
     v4.y = v2.y;
     v4.x = v1.x + ((v3.x - v1.x)*(v2.y - v1.y))/(v3.y - v1.y);
 

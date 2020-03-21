@@ -69,3 +69,11 @@ Day 009:
 Day 010: 
     - Triangle drawing implemented(Triangle rasterization)
     * Programming session duration: 1:30 hrs
+
+Day 011: 
+    - Vectors and math
+    * Programming session duration: 1:00 hrs
+
+Day 012: 
+    - Firework simulation
+    * Programming session duration: 2:20 hrs
